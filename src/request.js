@@ -1,24 +1,25 @@
 const axios = require("axios")
 const jsConvert = require('js-convert-case');
 let fs = require("fs")
-let {parseType, buildTypeName, getCompositeTypes, isPrimitiveType} = require("./parser");
+let { parseType, buildTypeName, getCompositeTypes, isPrimitiveType } = require("./parser");
 
 let url = 'http://sgscore/api/abp/api-definition?IncludeTypes=true'
 let targetModule = 'config'
 let rootNamespace = 'Itcomp.Sgs.Config'
 let dtosConfig = {}
 
-function makeRequest() {
-    const data = fs.readFileSync('./json.json', 'utf8') 
-    return {
-        services: getServicesConfig(targetModule, rootNamespace, JSON.parse(data)),
-        dtos: dtosConfig
-    }
-    // return axios.get(url).then(response => {
-        
-    // }).catch(error => {
-    //     console.log(error);
-    // });
+function makeRequest() { 
+    return axios.get(url).then(response => {
+        let { modules, types } = response.data
+        services = getServicesConfig(targetModule, rootNamespace, { modules, types })
+        let res = groupDtos(dtosConfig, rootNamespace, types)
+        return {
+            services,
+            dtos: res
+        }
+    }).catch(error => {
+        console.log(error);
+    });
 }
 
 
@@ -53,16 +54,16 @@ function getServicesConfig(key, rootNamespace, { modules, types }) {
             let fn = controller.actions[action]
             let fonction = {}
             fonction.T = 'any'
-            fonction.R = parseType(fn.returnValue.typeSimple,true, false) // getType(fn.returnValue.typeSimple)
+            fonction.R = parseType(fn.returnValue.typeSimple, true, false) // getType(fn.returnValue.typeSimple)
             fonction.name = jsConvert.toCamelCase(fn.name.replace('Async', ''))
             fonction.method = fn.httpMethod
             fonction.url = "/" + fn.url
             fonction.inputType = []
             fn.parametersOnMethod.forEach(arg => {
-                config.dependencies = addDependicies(config.dependencies, resolveDtoConfig(rootNamespace,arg.typeSimple.replace('?', '') ,types))
+                config.dependencies = addDependicies(config.dependencies, resolveDtoConfig(rootNamespace, arg.typeSimple.replace('?', ''), types))
                 fonction.inputType.push({
                     name: arg.name,
-                    type: parseType(arg.typeSimple.replace('?', ''),true, false),  //getType(arg.typeSimple.replace('?', '')),
+                    type: parseType(arg.typeSimple.replace('?', ''), true, false),  //getType(arg.typeSimple.replace('?', '')),
                     optional: arg.isOptional ? '?' : ''
                 })
             })
@@ -89,26 +90,26 @@ function getServicesConfig(key, rootNamespace, { modules, types }) {
 
             })
 
-            config.dependencies = addDependicies(config.dependencies, resolveDtoConfig(rootNamespace, fn.returnValue.typeSimple ,types))
+            config.dependencies = addDependicies(config.dependencies, resolveDtoConfig(rootNamespace, fn.returnValue.typeSimple, types))
             config.functions.push(fonction)
         }
         //fs.writeFileSync("./json.json", JSON.stringify(config))
         config.imports = setImports(rootNamespace, controller.type, config.dependencies)
         configurations.push(config)
-    }   
+    }
     return configurations
 }
 
 let addDependicies = (deps, elements) => {
     if (elements) {
-        elements.forEach(el=>{
-            if (isPrimitiveType(el)<0 && deps.indexOf(el)<0) {
+        elements.forEach(el => {
+            if (isPrimitiveType(el) < 0 && deps.indexOf(el) < 0) {
                 deps.push(el)
             }
-        }) 
+        })
     }
     return deps
-     
+
 }
 
 let getDirectory = (type, rootNamespace) => {
@@ -126,8 +127,8 @@ const pascalToSnakeCase = (str) => {
 
 
 
-function resolveDtoConfig(root, namespace, types ) {
- 
+function resolveDtoConfig(root, namespace, types) {
+
 
     namespace = namespace.replace(/\[/g, '').replace(/\]/g, '')
     let key = parseType(namespace, false, true)
@@ -136,19 +137,23 @@ function resolveDtoConfig(root, namespace, types ) {
         let dto = types[key]
         if (dto) {
             let name = buildTypeName(namespace, dto.genericArguments)
-            let directory = getDirectory(namespace,root)
+            let directory = getDirectory(namespace, root)
+            let ns = namespace.replace(root + ".",).split('.')
+            ns.pop()
             let config = {
-                fileName: pascalToSnakeCase(name.replace("Dto",""))+".dto.ts",
+                fileName: pascalToSnakeCase(name.replace("Dto", "")) + ".dto.ts",
                 directory: directory,
+                ns: ns.join("."),
                 dtoName: name,
                 isEnum: dto.isEnum,
-                baseType:  dto.baseType ? parseType(dto.baseType, true, false) : '',
+                baseType: dto.baseType ? parseType(dto.baseType, true, false) : '',
                 genericArguments: dto.genericArguments,
-                imports:[],
-                properties:[]
+                imports: [],
+                properties: [],
+                dependencies: []
             }
             if (dto.isEnum) {
-                dto.enumNames.forEach((name,index)=>{
+                dto.enumNames.forEach((name, index) => {
                     config.properties.push({
                         name,
                         type: dto.enumValues[index],
@@ -156,51 +161,53 @@ function resolveDtoConfig(root, namespace, types ) {
                     })
                 })
             } else {
-                dto.properties ? dto.properties.forEach(prop=>{
-                    if (isPrimitiveType(prop.typeSimple)<0) {
-                        resolveDtoConfig(root, prop.typeSimple, types)
+                dto.properties ? dto.properties.forEach(prop => {
+                    if (isPrimitiveType(prop.typeSimple) < 0) {
+                        config.dependencies = addDependicies(config.dependencies, resolveDtoConfig(root, prop.typeSimple, types))
                     }
                     config.properties.push({
                         name: jsConvert.toCamelCase(prop.name),
-                        type: parseType(prop.typeSimple.replace('?',''), true, false),
+                        type: parseType(prop.typeSimple.replace('?', ''), true, false),
                         isOptional: prop.typeSimple.includes("?")
                     })
                 }) : true
-               
-               
+
+
                 if (config.baseType) {
-                    resolveDtoConfig(root, dto.baseType, types)
+                    config.dependencies = addDependicies(config.dependencies, resolveDtoConfig(root, dto.baseType, types))
+
+
                 }
             }
 
             dtosConfig[key] = config
-            
-        } 
+
+        }
     }
     let composites = getCompositeTypes(namespace)
-    composites.forEach(piece=>{
-        if (piece!=namespace && isPrimitiveType(piece)<0) {
-            resolveDtoConfig(root,piece,types)
+    composites.forEach(piece => {
+        if (piece != namespace && isPrimitiveType(piece) < 0) {
+            resolveDtoConfig(root, piece, types)
         }
     })
     return composites
 }
 
-function setImports(rootNamespace,currentNamespace, deps) {
+function setImports(rootNamespace, currentNamespace, deps) {
     let imports = {}
-    let prefix = currentNamespace.replace(rootNamespace+".",'').split('.').map(x=>"..")
-
-    deps.forEach(dep=>{
-        let el = dep.replace(rootNamespace+".",'')
+    let prefix = currentNamespace.replace(rootNamespace + ".", '').split('.').map(x => "..")
+    
+    deps.forEach(dep => {
+        let el = dep.replace(rootNamespace + ".", '')
         let parts = el.split(".")
         let obj = parts.pop()
-        let pieces = parts.map(x=> pascalToSnakeCase(x)) 
-        let path= prefix.join("/")+"/dtos/"+pieces.join('/')+(pieces.length>0 ? '/':'')+"models"
-        if (imports[path] && isPrimitiveType(obj)<0) {
+        let pieces = parts.map(x => pascalToSnakeCase(x))
+        let path = prefix.join("/") + "/dtos/" + pieces.join('/') + (pieces.length > 0 ? '/' : '') + "models"
+        if (imports[path] && isPrimitiveType(obj) < 0) {
             imports[path].names.push(obj)
         } else {
-            if (isPrimitiveType(obj)<0) {
-                imports[path]= {
+            if (isPrimitiveType(obj) < 0) {
+                imports[path] = {
                     path,
                     names: [obj],
                 }
@@ -219,11 +226,47 @@ function setImports(rootNamespace,currentNamespace, deps) {
 }
 
 
+function groupDtos(dtos, rootNamespace, types) {
+    let groups = {}
 
+    for (key in dtos) {
+        let dto = dtos[key]
+        if (groups[dto.directory]) {
+            groups[dto.directory].dtos.push(dto)
+            groups[dto.directory].dependencies = addDependicies(groups[dto.directory].dependencies, dto.dependencies)
+        } else {
+            groups[dto.directory] = {
+                fileName: "models.ts",
+                directory: dto.directory,
+                ns: dto.ns,
+                imports: [],
+                content: "",
+                dtos: [dto],
+                dependencies: [...dto.dependencies]
+            }
+        }
+    }
+    for (key in groups) {
+        let group = groups[key]
+        group.dependencies = cleanDependencies(group, types)
+        group.imports = setImports(rootNamespace, group.ns, group.dependencies)
+    }
+    return groups
+}
 
-
-
-
+function cleanDependencies(group, types) {
+    let clone = []
+    group.dependencies.forEach(dep => {
+        let key = parseType(dep.replace(/\[/g, '').replace(/\]/g, ''), false, true)
+        if (types[key]) {
+            let found = group.dtos.find(x => dep.split('.').pop() == x.dtoName)
+            if (!found) {
+                clone.push(dep)
+            }
+        }
+    })
+    return clone
+}
 
 
 

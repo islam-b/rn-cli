@@ -48,12 +48,14 @@ export interface PropertyType {
 export interface DtoType {
     fileName: string,
     directory: string,
+    ns: string,
     dtoName:string,
     isEnum: boolean,
     baseType: string,
     genericArguments: string,
     imports: ImportType[],
-    properties: PropertyType[]
+    properties: PropertyType[],
+    dependencies: string[]
 }
 
 export interface ModelsType {
@@ -61,4 +63,6 @@ export interface ModelsType {
     directory: string,
     imports: ImportType[],
     content: string, 
+    dtos: DtoType[],
+    dependencies: string[]
 }

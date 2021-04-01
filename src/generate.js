@@ -1,41 +1,11 @@
-let {renderProxyService , renderDto, renderEnum} = require("./template")
+let {renderProxyService , renderDto, renderEnum, renderImports} = require("./template")
 
 let fs = require("fs")
 let makeRequest = require("./request")
 
-let configuration = {
-    imports: [
-        {
-            obj: 'CycleDto',
-            path: '@module/proxy'
-        }, {
-            obj: 'CycleDto',
-            path: '@module/proxy'
-        }
-    ],
-    functions: [
-        {
-            name: 'getList',
-            T: "any",
-            R: "CycleDto",
-            method: "POST",
-            url: "api/config/lookup/promotions/{id}",
-            inputs: "",
-            inputType: [
-                {
-                    name: "id",
-                    type: "string",
-                    optional: '?'
-                }
-            ],
-            body: 'input',
-            paramsType: []
-        }
-    ]
-}
 
-//.then(metas => { 
-    let metas =makeRequest()
+
+makeRequest().then(metas => { 
     metas.services.forEach(meta => { 
         let output = renderProxyService(meta)
         output = output.replace(/&quot;/g, '\"')
@@ -49,18 +19,15 @@ let configuration = {
             .replace(/&#x60;/g, '\`')
         saveServices(meta.directory, meta.fileName, output)
     })
-    let groups = groupDtos(metas.dtos)
-    for (key in groups) {
-        let group = groups[key]
-        saveDtos(group.directory, group.fileName, group.content)
-    } 
-//})
+    
+    for (key in metas.dtos) {
+        let group = metas.dtos[key]
+        let imports = renderImports(group.imports) +"\n\n"
+        group.content = imports + group.dtos.map(dto=>{
+            return dto.isEnum ? renderEnum(dto) : renderDto(dto) 
+        }).join('')
 
-function groupDtos(dtos) {
-    let groups =  Object.keys(dtos).reduce((acc, key) => {
-        let dto = dtos[key]
-        let output = dto.isEnum ? renderEnum(dto) : renderDto(dto) 
-        output = output.replace(/&quot;/g, '\"')
+        group.content = group.content.replace(/&quot;/g, '\"')
             .replace(/amp;/g, '')
             .replace(/&#x2F;/g, '/')
             .replace(/&lt;/g, '<')
@@ -69,22 +36,10 @@ function groupDtos(dtos) {
             .replace(/&gt;/g, '>')
             .replace(/&#x3D;/g, '=')
             .replace(/&#x60;/g, '\`')
-        
-        if (acc[dto.directory]) {
-            acc[dto.directory].content = acc[dto.directory].content + output
-        } else {
-            acc[dto.directory] = {
-                fileName: "models.ts",
-                directory: dto.directory,
-                imports: [],
-                content: output, 
-            }
-        }
-        return acc;
-
-    }, {}); 
-    return groups
-}
+ 
+        saveDtos(group.directory, group.fileName, group.content)
+    } 
+})
 
 
 function saveServices(directory, fileName, output) {

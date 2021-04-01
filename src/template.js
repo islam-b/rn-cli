@@ -146,5 +146,5 @@ function renderDto(dto) {
 
 
 
-module.exports  =  {renderProxyService , renderDto, renderEnum}
+module.exports  =  {renderProxyService , renderDto, renderEnum, renderImports}
  
