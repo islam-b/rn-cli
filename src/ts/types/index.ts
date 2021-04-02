@@ -1,20 +1,20 @@
-interface ImportType {
+export interface ImportType {
     obj: string,
     path: string
 }
 
-interface InputFnType {
+export interface InputFnType {
     name: string,
     type: string,
     optional: '?' | ''
 }
 
-interface ParamType{
+export interface ParamType{
     key: string,
     value: string,
 }
 
-interface FunctionType {
+export interface FunctionType {
     T: string,
     R: string, 
     name: string,

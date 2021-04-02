@@ -1,3 +1,17 @@
+import { Dtos, Services } from "./factory";
+
 export class Renderer {
-    // render functions
+    
+    constructor(private services:Services, private dtos:Dtos) {
+        
+    }
+
+
+    renderServices() {
+
+    }
+
+    renderDtos() {
+        
+    }
 }

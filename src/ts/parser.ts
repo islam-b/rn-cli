@@ -4,7 +4,7 @@ import { TypeNode } from "./types/type-node"
 
 export class Parser {
 
-    queue: Queue
+    queue: Queue = new Queue()
 
     static systemTypesMapping = {
         "System.Int32": "number",
@@ -36,7 +36,7 @@ export class Parser {
             return res +"<"+genericArgs.join(',')+">"
     
         } else {
-            return fullTypeDeclaration.split('.').pop()
+            return fullTypeDeclaration.split('.').pop() as string;
         }
     }
     
@@ -44,12 +44,12 @@ export class Parser {
         fullTypeDeclaration = fullTypeDeclaration.replace(rootNamespace + ".", "")
         let parts = fullTypeDeclaration.split(".")
         parts.pop()
-        let res = parts.map(p => this.pascalToSnakeCase(p))
+        let res = parts.map(p => Parser.toSnakeCase(p))
         return res.join("/")
     }
 
     getFileName(label: string, suffix:string) { 
-        return this.pascalToSnakeCase(label.replace("Dto", "")) + "."+ suffix+".ts"
+        return Parser.toSnakeCase(label) + suffix+".ts"
     }
 
     getCompositeTypes(fullTypeDeclaration:string) {
@@ -60,10 +60,24 @@ export class Parser {
         } else return [this.mapSystemTypes(fullTypeDeclaration)];
     }
     
-    private getTypeTree(namespace:string): TypeNode {
+    getServiceName(name:string) {
+        return name.replace('Async', '')+"Service"
+    }
+
+    getNamespace(fullTypeDeclaration:string) {
+        let ns = fullTypeDeclaration.replace(fullTypeDeclaration + ".","").split('.')
+        return ns.pop() as string
+    }
+
+    getTypeTree(namespace:string): TypeNode {
         let ns = this.mapSystemTypes(namespace)
-        this.queue = new Queue()
-        this.buildTree(ns,0)
+        if (ns.includes("<")) {
+            this.queue = new Queue()
+            this.buildTree(ns,0)
+        } else {
+            this.queue = new Queue()
+            this.queue.data[0].typeArgs.push(new TypeNode(ns))
+        }
         return this.queue.tree
     }
 
@@ -106,15 +120,19 @@ export class Parser {
     private mapSystemTypes(namespace:string) {
         // map system types to simple js/ts types
         let res = namespace
-        for (origin in Parser.systemTypesMapping) {
+        for (let origin in Parser.systemTypesMapping) {
             res = res.replace(origin, Parser.systemTypesMapping[origin])
         }
         // convert "[type]" to "type[]""
-        return res.replace(/\[/g,'').replace(/]/g,'') 
+        return res.replace(/\[/g,'').replace(/\]/g,'[]')
     }
 
-    private pascalToSnakeCase(str) {
+    static toSnakeCase(str:string) {
         return jsConvert.toCamelCase(str).replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+    }
+
+    static toCamelCase(str) {
+        return jsConvert.toCamelCase(str)
     }
  
     static isPrimitive(type:string) {

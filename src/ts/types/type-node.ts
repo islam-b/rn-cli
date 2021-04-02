@@ -51,7 +51,7 @@ export class TypeNode {
         let str = (!showPlaceholder || level<=1) ? node.name.split(".").pop() : ("T"+index)
         let generics = node.typeArgs.map((element,index) => {
             return this.stringifyToType(element,level+1,index,showPlaceholder)
-        }).join(','); 
-        return generics=="" ? str : str+"<"+generics+">" 
+        }).join(',');
+        return (generics=="" ? str : str+"<"+generics+">") as string;
     }
 }
