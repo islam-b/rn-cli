@@ -1,23 +1,28 @@
-import { DtoBuilder } from "./dto-builder";
+import { DtoMetadata } from "./dto-metadata";
 import Options from "./executor";
 import { Parser } from "./parser";
 import { ServiceMetadata } from "./service-metadata";
-import { DtoType, PropertyType } from "./types";
+import { DtoType, ModelsType, PropertyType } from "./types";
+import { ModelsMetadata } from "./models-metadata";
 
 export interface Dtos {
-    [key:string]: DtoType
+    [key:string]: DtoMetadata
+}
+export interface Models {
+    [key:string]: ModelsMetadata
 }
 export type Services = ServiceMetadata[]
 
 export class Factory {
 
-    dtos: Dtos= {}
+    private dtos: Dtos= {}
     services: Services = []
+    models: Models={}
     private module  
     private parser = new Parser()
 
     // Main Factory options root ns, module, ... 
-    constructor(private options:Options, private modules:any, private types:any) {
+    constructor(private options:Options, modules:any, private types:any) {
         this.module = modules[options.module]
         if (!this.module) {
             throw new Error("Module not found")
@@ -31,83 +36,44 @@ export class Factory {
                 controller,
                 this.module.rootPath,
                 this.options,
-                this,
-                this.resolveDto)
+                this)
             this.services?.push(metadata)
         }
     } 
 
-    resolveDto(_this: Factory,fullTypeDeclaration:string) { 
+    resolveDto(fullTypeDeclaration:string) { 
 
-        let key = _this.parser.getKeyFromNamespace(fullTypeDeclaration)
+        let key = this.parser.getKeyFromNamespace(fullTypeDeclaration)
         console.log(key)
-        let rootNamespace = _this.options.rootNamespace
-        if (_this.dtos[key]==undefined) {
-            let dto = _this.types[key]
+        if (this.dtos[key]==undefined) {
+            let dto = this.types[key]
             if (dto) {
-
-                let name = _this.parser.getLabelFromNamespace(fullTypeDeclaration, dto.genericArguments)
-                let directory = _this.parser.getDirectory(fullTypeDeclaration, rootNamespace )
-                
-                let config = {
-                    fileName: _this.parser.getFileName(name,""),
-                    directory: directory,
-                    ns: _this.parser.getNamespace(fullTypeDeclaration),
-                    dtoName: name,
-                    isEnum: dto.isEnum,
-                    baseType: dto.baseType ? _this.parser.getTypeTree(dto.baseType).toStringType(false)  : '',
-                    genericArguments: dto.genericArguments,
-                    imports: [],
-                    properties: [],
-                    dependencies: []
-                } as DtoType
-                if (dto.isEnum) {
-                    dto.enumNames.forEach((name, index) => {
-                        config.properties.push({
-                            name,
-                            type: dto.enumValues[index],
-                            isOptional: false
-                        } as PropertyType)
-                    })
-                } else {
-                    dto.properties ? dto.properties.forEach(prop => {
-                        if (!Parser.isPrimitive(prop.typeSimple)) {
-                            config.dependencies = _this.addDependicies(config.dependencies, _this.resolveDto( _this,prop.typeSimple))
-                        }
-                        config.properties.push({
-                            name: Parser.toCamelCase(prop.name),
-                            type: _this.parser.getTypeTree(prop.typeSimple).toStringType(false),
-                            isOptional: prop.typeSimple.includes("?")
-                        } as PropertyType)
-                    }) : true
-    
-    
-                    if (config.baseType) {
-                        config.dependencies = _this.addDependicies(config.dependencies, _this.resolveDto( _this,dto.baseType))
-                    }
-                }
-    
-                _this.dtos[key] = config
-    
+                this.dtos[key] = new DtoMetadata(dto, this.options, fullTypeDeclaration, this)
             }
         }
-        let composites = _this.parser.getCompositeTypes(fullTypeDeclaration)
+        let composites = this.parser.getCompositeTypes(fullTypeDeclaration)
         composites.forEach(piece => {
             if (piece != fullTypeDeclaration &&  !Parser.isPrimitive(piece)) {
-                _this.resolveDto(_this,piece)
+                this.resolveDto(piece)
             }
         })
         return composites
     }
 
-    addDependicies(deps, elements){
-        if (elements) {
-            elements.forEach(el => {
-                if (!Parser.isPrimitive(el) && deps.indexOf(el) < 0) {
-                    deps.push(el)
-                }
-            })
+    groupDtosByNamespace() { 
+        for (let key in this.dtos) {
+            let dto = this.dtos[key]
+            if (this.models[dto.directory]) {
+                this.models[dto.directory].addDto(dto)
+            } else {
+                this.models[dto.directory] = new ModelsMetadata(dto,this.options,this.types)
+            }
         }
-        return deps
+        for (let key in this.models) { 
+            this.models[key].generateImportsMetadata()
+        }
     }
+    
+    
+ 
 }

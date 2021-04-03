@@ -19,8 +19,7 @@ export class ServiceMetadata {
     // service proxy builder 
     constructor(private controller, apiName:string,
                 private options:Options, 
-                private factory: Factory,
-                private resolveDto:typeof Factory.prototype.resolveDto) {
+                private factory: Factory) {
         this.parser = new Parser()
         this.serviceName = this.parser.getServiceName(controller.controllerName)
         this.fileName = this.parser.getFileName(controller.controllerName,".service")
@@ -43,7 +42,7 @@ export class ServiceMetadata {
             fonction.url = "/" + fn.url
             fonction.inputType = [] as InputFnType[]
             fn.parametersOnMethod.forEach(arg => {
-                this.addDependencies(this.resolveDto(this.factory,arg.typeSimple))
+                this.addDependencies(this.factory.resolveDto(arg.typeSimple))
                 fonction.inputType.push({
                     name: arg.name,
                     type: this.parser.getTypeTree(arg.typeSimple).toStringType(false),
@@ -72,7 +71,7 @@ export class ServiceMetadata {
 
             })
 
-            this.addDependencies(this.resolveDto(this.factory,fn.returnValue.typeSimple))
+            this.addDependencies(this.factory.resolveDto(fn.returnValue.typeSimple))
             functions.push(fonction)
         }
         return functions

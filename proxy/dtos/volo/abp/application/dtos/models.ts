@@ -13,10 +13,6 @@ export interface PagedResultRequestDto extends LimitedResultRequestDto {
  	skipCount: number 
 }
 
-export interface PagedAndSortedResultRequestDto extends PagedResultRequestDto { 
- 	sorting: string 
-}
-
 export interface ListResultDto<T>  { 
  	items: T[] 
 }

@@ -63,6 +63,7 @@ export interface ModelsType {
     directory: string,
     imports: ImportType[],
     content: string, 
+    ns:string,
     dtos: DtoType[],
     dependencies: string[]
 }

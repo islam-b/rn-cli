@@ -3,7 +3,7 @@ import Options, { Executor } from "./executor"
 var options = {
     url: "https://localhost:44357/api/abp/api-definition?IncludeTypes=true",
     module : 'blog',
-    rootNamespace : 'Itcomp.Sgs.Blog', 
+    rootNamespace : 'Blog.Code.App', 
     targetFolder: ""
 } as Options
 

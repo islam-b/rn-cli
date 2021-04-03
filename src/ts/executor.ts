@@ -12,27 +12,27 @@ export default interface Options {
     targetFolder: string
 }
 export class Executor {
-    
 
-    private appConfig = {} as {modules, types}
+
+    private appConfig = {} as { modules, types }
     private axiosInstance: AxiosInstance
     private factory?: Factory
     private renderer?: Renderer
 
-    constructor(private options:Options) {
+    constructor(private options: Options) {
         this.axiosInstance = axios.create({
-            httpsAgent: new Agent({  
-              rejectUnauthorized: false
+            httpsAgent: new Agent({
+                rejectUnauthorized: false
             })
         });
     }
 
     getApiDefinition() {
         console.log("INFO: Getting Api definition...")
-        return  this.axiosInstance.get(this.options.url).then((response)=>{
+        return this.axiosInstance.get(this.options.url).then((response) => {
             this.appConfig = response.data
             return this
-        }).catch(error=>{
+        }).catch(error => {
             throw new Error("ERROR: Could not get api definition")
         })
     }
@@ -40,21 +40,34 @@ export class Executor {
     configureServicesAndDtos() {
         console.log("INFO: Configure services and dtos...")
         this.factory = new Factory(this.options, this.appConfig.modules, this.appConfig.types)
-        this.factory.resolveServices() 
+        this.factory.resolveServices()
+        this.factory.groupDtosByNamespace()
         return this
     }
 
     renderFiles() {
         console.log("INFO: Rendering files...")
-        this.renderer = new Renderer(this.factory?.services!, this.factory?.dtos!)
-        this.renderer.renderServices()
-        this.renderer.renderDtos()
+        this.renderer = new Renderer(this.factory?.services!, this.factory?.models!)
         return this
     }
 
     saveFiles() {
-        console.log("INFO: Saving into target folder...")
-        // content = this.renderer....  save files using fs
+        this.renderer?.services.forEach(service => {
+            var dir = './proxy/services/' + service.directory;
+
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            fs.writeFileSync(dir + "/" + service.fileName, service.content)
+        })
+        this.renderer?.models.forEach(model => {
+            var dir = './proxy/dtos/' + model.directory;
+
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            fs.writeFileSync(dir + "/" + model.fileName, model.content)
+        })
         return this
     }
 
