@@ -57,7 +57,7 @@ export class Factory {
                 this.resolveDto(piece)
             }
         })
-        return composites
+        return [...composites, key]
     }
 
     groupDtosByNamespace() { 

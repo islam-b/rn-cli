@@ -14,9 +14,9 @@ export class TypeNode {
     toStringType = (showPlaceholder:boolean) => this.stringifyToType(this,0,0,showPlaceholder)
 
     extractTypes():string[] {
-        let res = [] 
+        let res = [] as string[]
         if (!this.isPrimitive) {
-            let res = [this.name.split(".").pop()]
+            res = [this.name.split(".").pop() as string]
             this.typeArgs.forEach((element) => {
                 res = [...res, ...element.extractTypes()]
             }); 
@@ -25,11 +25,11 @@ export class TypeNode {
     }
 
     extractNamespaces():string[]  {
-        let res = []
+        let res = [] as string[]
         if (!this.isPrimitive) {
-            let res = [this.name]
+            res = [this.name]
             this.typeArgs.forEach((element) => {
-                res = [...res, ...element.extractTypes()]
+                res = [...res, ...element.extractNamespaces()]
             }); 
         } 
         return res

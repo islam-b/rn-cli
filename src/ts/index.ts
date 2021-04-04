@@ -1,9 +1,9 @@
 import Options, { Executor } from "./executor"
 
 var options = {
-    url: "https://localhost:44357/api/abp/api-definition?IncludeTypes=true",
-    module : 'blog',
-    rootNamespace : 'Blog.Code.App', 
+    url: "http://sgscore/api/abp/api-definition?IncludeTypes=true",
+    module : 'config',
+    rootNamespace : 'Itcomp.Sgs.Config', 
     targetFolder: ""
 } as Options
 

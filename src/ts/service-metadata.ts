@@ -23,7 +23,7 @@ export class ServiceMetadata {
         this.parser = new Parser()
         this.serviceName = this.parser.getServiceName(controller.controllerName)
         this.fileName = this.parser.getFileName(controller.controllerName,".service")
-        this.directory = this.parser.getDirectory(this.serviceName,options.rootNamespace)
+        this.directory = this.parser.getDirectory(controller.type, options.rootNamespace)
         this.apiName = apiName
         this.dependencies = []
         this.functions = this.generateFunctionsMetadata()
@@ -37,7 +37,7 @@ export class ServiceMetadata {
             let fonction = {} as FunctionType
             fonction.T = 'any'
             fonction.R = this.parser.getTypeTree(fn.returnValue.typeSimple).toStringType(false)
-            fonction.name = this.parser.getServiceName(fn.name)
+            fonction.name = Parser.toCamelCase(fn.name.replace("Async",""))
             fonction.method = fn.httpMethod
             fonction.url = "/" + fn.url
             fonction.inputType = [] as InputFnType[]

@@ -11,6 +11,7 @@ export class Parser {
         "System.String": "string",
         "System.Void":  "void",
         "System.Boolean": "boolean",
+        "System.Guid": "string",
         "Int32": "number",
         "String": "string",
         "Void":  "void",
@@ -30,6 +31,7 @@ export class Parser {
     }
 
     getLabelFromNamespace(fullTypeDeclaration:string, genericArgs: string[]) { 
+        fullTypeDeclaration = fullTypeDeclaration.replace(/\[/,"").replace(/\]/,"")
         if (fullTypeDeclaration.includes("<")) {
             let parts = fullTypeDeclaration.split("<")
             let res = parts[0].split(".").pop() 
@@ -61,7 +63,7 @@ export class Parser {
     }
     
     getServiceName(name:string) {
-        return name.replace('Async', '')+"Service"
+        return name+"Service"
     }
 
     getNamespace(fullTypeDeclaration:string) {

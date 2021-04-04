@@ -55,7 +55,7 @@ export class ModelsMetadata {
             let parts = el.split(".")
             let obj = parts.pop() as string
             let pieces = parts.map(x => Parser.toSnakeCase(x))
-            let path = "./"+prefix.join("/") + pieces.join('/') + (pieces.length > 0 ? '/' : '') + "models"
+            let path = (prefix.length>0 ? prefix.join("/") : ".") + "/" + pieces.join('/') + (pieces.length > 0 ? '/' : '') + "models"
             if (imports[path] && !Parser.isPrimitive(obj)) {
                 imports[path].names.push(obj)
             } else {

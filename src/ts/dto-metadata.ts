@@ -12,7 +12,6 @@ export class DtoMetadata {
     isEnum: boolean
     baseType: string
     genericArguments: string
-    imports: ImportType[]
     properties: PropertyType[]
     dependencies: string[]
 
@@ -31,7 +30,7 @@ export class DtoMetadata {
         this.genericArguments = dto.genericArguments
         this.dependencies = [] 
         this.properties = this.isEnum ? this.generateEnumValuesMetadata() : this.generatePropertiesMetadata()
-        this.imports = this.generateImportsMetadata()  
+        
     }
 
     
@@ -43,12 +42,12 @@ export class DtoMetadata {
             }
             properties.push({
                 name: Parser.toCamelCase(prop.name),
-                type: this.parser.getTypeTree(prop.typeSimple).toStringType(false),
+                type: this.parser.getTypeTree(prop.typeSimple).toStringType(false).replace("?",""),
                 isOptional: prop.typeSimple.includes("?")
             } as PropertyType)
         })
-
         if (this.baseType) {
+            // TODO replace composites with direct key namespace
             this.addDependencies(this.factory.resolveDto( this.dto.baseType))
         }
         return properties
@@ -64,39 +63,6 @@ export class DtoMetadata {
             } as PropertyType)
         })
         return values
-    }
-
-    private generateImportsMetadata() {
-        let imports = {}
-        let rootNamespace = this.options.rootNamespace
-        let prefix = this.fullTypeDeclaration.replace(rootNamespace + ".", '').split('.').map(x => "..")
-        prefix.length>0 ? prefix.pop() : true
-        this.dependencies.forEach(dep => {
-            let el = dep.replace(rootNamespace + ".", '')
-            let parts = el.split(".")
-            let obj = parts.pop() as string
-            let pieces = parts.map(x => Parser.toSnakeCase(x))
-            let path = prefix.join("/") + "/" + pieces.join('/') + (pieces.length > 0 ? '/' : '') + "models"
-            if (imports[path] && !Parser.isPrimitive(obj)) {
-                imports[path].names.push(obj)
-            } else {
-                if (!Parser.isPrimitive(obj)) {
-                    imports[path] = {
-                        path,
-                        names: [obj],
-                    }
-                }
-            }
-        })
-        let response = [] as ImportType[];
-        for (let key in imports) {
-            let item = {
-                obj: imports[key].names.join(", "),
-                path: imports[key].path
-            } as ImportType
-            response.push(item)
-        }
-        return response
     }
 
     private addDependencies(elements) {
