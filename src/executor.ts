@@ -52,8 +52,9 @@ export class Executor {
     }
 
     saveFiles() {
+        console.log("INFO: Saving into directory...")
         this.renderer?.services.forEach(service => {
-            var dir = './proxy/services/' + service.directory;
+            var dir = './src/'+this.options.targetFolder+'/proxy/services/' + service.directory;
 
             if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir, { recursive: true });
@@ -61,7 +62,7 @@ export class Executor {
             fs.writeFileSync(dir + "/" + service.fileName, service.content)
         })
         this.renderer?.models.forEach(model => {
-            var dir = './proxy/dtos/' + model.directory;
+            var dir = './src/'+this.options.targetFolder+'/proxy/dtos/' + model.directory;
 
             if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir, { recursive: true });

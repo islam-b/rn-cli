@@ -8,6 +8,6 @@
       "strict": true,
       "sourceMap": true
     },
-    "include": ["src"],
+    "include": ["src", "bin","js/index.js"],
     "exclude": ["node_modules", "**/__tests__/*"]
 }

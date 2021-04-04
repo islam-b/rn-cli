@@ -44,7 +44,6 @@ export class Factory {
     resolveDto(fullTypeDeclaration:string) { 
 
         let key = this.parser.getKeyFromNamespace(fullTypeDeclaration)
-        console.log(key)
         if (this.dtos[key]==undefined) {
             let dto = this.types[key]
             if (dto) {
