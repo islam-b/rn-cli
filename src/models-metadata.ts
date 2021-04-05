@@ -83,9 +83,14 @@ export class ModelsMetadata {
         this.dependencies.forEach(dep => {
             let key = this.parser.getTypeTree(dep.replace(/\[/g, '').replace(/\]/g, '')).toStringNamespace(true)
             if (this.types[key]) {
-                let found = this.dtos.find(x => dep.split('.').pop() == x.dtoName)
+                let typename =  this.parser.getTypeTree(dep.replace(/\[/g, '').replace(/\]/g, '')).toStringType(true)
+                let found = this.dtos.find(x => {
+                    let s = this.parser.getTypeTree(x.dtoName.replace(/\[/g, '').replace(/\]/g, '')).toStringType(true)
+                    return typename == s
+                })
                 if (!found) {
-                    clone.push(dep)
+                    let temp = dep.replace(/<.*>/,'')
+                    clone.indexOf(temp)<0 ? clone.push(temp) : true
                 }
             }
         })

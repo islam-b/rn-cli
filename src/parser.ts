@@ -43,7 +43,7 @@ export class Parser {
     }
     
     getDirectory(fullTypeDeclaration:string, rootNamespace: string) {
-        fullTypeDeclaration = fullTypeDeclaration.replace(rootNamespace + ".", "")
+        fullTypeDeclaration = fullTypeDeclaration.replace(rootNamespace + ".", "").replace(/<.*>/g,'')
         let parts = fullTypeDeclaration.split(".")
         parts.pop()
         let res = parts.map(p => Parser.toSnakeCase(p))

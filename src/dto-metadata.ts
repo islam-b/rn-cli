@@ -47,7 +47,6 @@ export class DtoMetadata {
             } as PropertyType)
         })
         if (this.baseType) {
-            // TODO replace composites with direct key namespace
             this.addDependencies(this.factory.resolveDto( this.dto.baseType))
         }
         return properties

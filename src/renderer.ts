@@ -113,7 +113,7 @@ export class Renderer {
     }
 
     private renderBody(body) {
-        return body == null ? '' : '\n \t \t \tbody: ' + body
+        return body == null ? '' : '\n \t \t \tdata: ' + body
     }
 
     private renderUrl(url) {

@@ -48,7 +48,7 @@ export class TypeNode {
     }
 
     private stringifyToType(node: TypeNode, level, index, showPlaceholder): string {
-        let str = (!showPlaceholder || level<=1) ? node.name.split(".").pop() : ("T"+index)
+        let str = (!showPlaceholder || level<1) ? node.name.split(".").pop() : ("T"+index)
         let generics = node.typeArgs.map((element,index) => {
             return this.stringifyToType(element,level+1,index,showPlaceholder)
         }).join(',');

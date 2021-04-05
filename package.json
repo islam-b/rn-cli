@@ -1,8 +1,12 @@
 {
   "name": "@itcomp/abp-rn",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "CLI for generating proxy for react native abp templates.",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "typings": "lib/index",
+  "files": [
+    "lib/"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
@@ -23,9 +27,7 @@
     "file-system": "^2.2.2",
     "generate-template-files": "^3.0.0",
     "js-convert-case": "^4.1.1",
-    "yargs": "^16.2.0"
-  },
-  "devDependencies": {
+    "yargs": "^16.2.0",
     "@types/node": "^14.14.37",
     "fs": "0.0.1-security",
     "mustache": "^4.2.0",
