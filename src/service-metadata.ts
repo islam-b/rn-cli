@@ -113,7 +113,8 @@ export class ServiceMetadata {
     private addDependencies(elements) {
         if (elements) {
             elements.forEach(el => {
-                if (!Parser.isPrimitive(el) && this.dependencies.indexOf(el) < 0) {
+                let temp = el.replace(/<.*>/,'')
+                if (!Parser.isPrimitive(el) && this.dependencies.indexOf(temp) < 0) {
                     this.dependencies.push(el)
                 }
             })

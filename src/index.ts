@@ -18,8 +18,8 @@ interface Config {
 
 let options = {
     url: "https://localhost:44357/api/abp/api-definition?IncludeTypes=true",
-    module: "blog",
-    rootNamespace: "Blog.Code.App",
+    module: "config",
+    rootNamespace: "Itcomp.Sgs.Config",
     targetFolder: "sample",
 }
 var executor = new Executor(options);
@@ -31,3 +31,4 @@ executor.getApiDefinition().then(()=>{
 }).catch(error=>{ 
     console.error(error)
 })
+

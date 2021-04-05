@@ -4,6 +4,7 @@ import { Renderer } from "./renderer";
 import * as fs from 'fs';
 import { Console } from "node:console";
 import { Agent } from "https";
+//import * as DATA from "../js/json.json"
 
 export default interface Options {
     url: string,
@@ -36,6 +37,11 @@ export class Executor {
             throw new Error("ERROR: Could not get api definition")
         })
     }
+
+    // testFromJson() {
+    //     this.appConfig = DATA
+    //     return this
+    // }
 
     configureServicesAndDtos() {
         console.log("INFO: Configure services and dtos...")
