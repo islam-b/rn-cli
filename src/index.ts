@@ -17,7 +17,7 @@ interface Config {
 
 
 let options = {
-    url: "https://localhost:44357/api/abp/api-definition?IncludeTypes=true",
+    url: "http://sgscore/api/abp/api-definition?IncludeTypes=true",
     module: "config",
     rootNamespace: "Itcomp.Sgs.Config",
     targetFolder: "sample",
