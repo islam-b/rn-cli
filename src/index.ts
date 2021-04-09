@@ -1,5 +1,5 @@
 import { AxiosInstance, AxiosRequestConfig } from "axios"
-import { Executor } from "./executor"
+ 
 
 export abstract class RestService {
     abstract getApi(apiName: string): AxiosInstance 
@@ -16,19 +16,19 @@ interface Config {
 }
 
 
-let options = {
-    url: "http://sgscore/api/abp/api-definition?IncludeTypes=true",
-    module: "config",
-    rootNamespace: "Itcomp.Sgs.Config",
-    targetFolder: "sample",
-}
-var executor = new Executor(options);
+// let options = {
+//     url: "http://sgscore/api/abp/api-definition?IncludeTypes=true",
+//     module: "config",
+//     rootNamespace: "Itcomp.Sgs.Config",
+//     targetFolder: "sample",
+// }
+// var executor = new Executor(options);
 
-executor.getApiDefinition().then(()=>{
-    executor.configureServicesAndDtos()
-            .renderFiles()
-            .saveFiles()
-}).catch(error=>{ 
-    console.error(error)
-})
+// executor.getApiDefinition().then(()=>{
+//     executor.configureServicesAndDtos()
+//             .renderFiles()
+//             .saveFiles()
+// }).catch(error=>{ 
+//     console.error(error)
+// })
 

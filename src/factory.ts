@@ -1,5 +1,5 @@
 import { DtoMetadata } from "./dto-metadata";
-import Options from "./executor";
+import {Options} from "./executor";
 import { Parser } from "./parser";
 import { ServiceMetadata } from "./service-metadata";
 import { DtoType, ModelsType, PropertyType } from "./types";

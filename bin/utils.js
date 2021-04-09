@@ -1,12 +1,6 @@
 
-
-function parseSentence(words) {
-    console.log(words);
-    var sentence = "";
-    for (var i = 1; i < words.length; i++) {
-        sentence = sentence + words[i] + " ";
-    }
-}
+const fs = require("fs")
+const babel = require("@babel/core")
 
 function showHelp() {                                                             
     
@@ -18,4 +12,32 @@ function showHelp() {
     console.log('\t--help\t\t      ' + 'Show help.' + '\t\t\t' + '[string]\n')  
 }
 
-module.exports = { parseSentence:parseSentence  , showHelp :showHelp  };
+function validateArgs(args) {
+    //if (args.b == null || args.b == "") return false
+    if (args.m == null || args.m == "") return false
+    //if (args.r == null || args.r == "") return false
+    if (args.t == null || args.t == "") return false
+    return true
+}
+
+
+
+function getEnvironment() {
+    try {
+        let envPath = process.cwd() + "" 
+        let data = babel.transformFileSync(envPath + "\\Environment.js", {
+            plugins: ["@babel/plugin-transform-modules-commonjs"]
+        }); 
+        let pathToTemp = process.cwd()+"/env.temp.js"
+        fs.writeFileSync(pathToTemp, "let __DEV__=true;\n"+data.code)
+        let enVars = require(pathToTemp).getEnvVars()
+        fs.unlinkSync(pathToTemp)
+        return enVars
+    } catch (e) {
+        throw new Error("ERROR: Could read environment file")
+    }
+    
+}
+
+
+module.exports = {  showHelp, validateArgs, getEnvironment   };

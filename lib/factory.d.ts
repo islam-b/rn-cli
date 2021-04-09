@@ -1,5 +1,5 @@
 import { DtoMetadata } from "./dto-metadata";
-import Options from "./executor";
+import { Options } from "./executor";
 import { ServiceMetadata } from "./service-metadata";
 import { ModelsMetadata } from "./models-metadata";
 export interface Dtos {

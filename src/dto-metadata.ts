@@ -1,4 +1,4 @@
-import Options from "./executor"
+import {Options} from "./executor"
 import { Factory } from "./factory"
 import { Parser } from "./parser"
 import { ImportType, PropertyType } from "./types"

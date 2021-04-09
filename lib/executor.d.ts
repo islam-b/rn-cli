@@ -1,16 +1,35 @@
-export default interface Options {
+export interface EnvVars {
+    apis: {
+        [key: string]: {
+            baseUrl: string;
+            rootNamespace: string;
+        };
+    };
+    oAuthConfig: {
+        issuer: string;
+        clientId: string;
+        clientSecret: string;
+        scope: string;
+    };
+    localization: any;
+}
+export interface Options {
     url: string;
     module: string;
     rootNamespace: string;
     targetFolder: string;
 }
 export declare class Executor {
-    private options;
+    private env;
+    private moduleName;
+    private targetFolder;
     private appConfig;
     private axiosInstance;
     private factory?;
     private renderer?;
-    constructor(options: Options);
+    private options?;
+    constructor(env: EnvVars, moduleName: string, targetFolder: string);
+    initialize(): this;
     getApiDefinition(): Promise<this>;
     configureServicesAndDtos(): this;
     renderFiles(): this;

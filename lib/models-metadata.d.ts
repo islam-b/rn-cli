@@ -1,6 +1,6 @@
 import { ImportType } from "./types";
 import { DtoMetadata } from "./dto-metadata";
-import Options from "./executor";
+import { Options } from "./executor";
 export declare class ModelsMetadata {
     private dto;
     private options;

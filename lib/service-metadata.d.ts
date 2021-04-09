@@ -1,4 +1,4 @@
-import Options from "./executor";
+import { Options } from "./executor";
 import { Factory } from "./factory";
 import { FunctionType, ImportType } from "./types";
 export declare class ServiceMetadata {

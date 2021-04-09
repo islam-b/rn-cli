@@ -1,7 +1,7 @@
 import { Parser } from "./parser"
 import { ImportType, PropertyType } from "./types"
 import { DtoMetadata} from "./dto-metadata"
-import Options from "./executor"
+import {Options} from "./executor"
 
 
 export class ModelsMetadata {
