@@ -1,3 +1,4 @@
+import * as ora from 'ora';
 export interface EnvVars {
     apis: {
         [key: string]: {
@@ -28,6 +29,7 @@ export declare class Executor {
     private factory?;
     private renderer?;
     private options?;
+    spinner: ora.Ora;
     constructor(env: EnvVars, moduleName: string, targetFolder: string);
     initialize(): this;
     getApiDefinition(): Promise<this>;

@@ -3,7 +3,8 @@ import { Factory } from "./factory";
 import { Renderer } from "./renderer";
 import * as fs from 'fs';
 import { Agent } from "https";
-
+import * as chalk from 'chalk';
+import * as ora from 'ora';
 
 export interface EnvVars {
     apis: {
@@ -36,6 +37,7 @@ export class Executor {
     private factory?: Factory
     private renderer?: Renderer
     private options?: Options
+    spinner = ora('')
 
     constructor(private env: EnvVars, private moduleName: string, private targetFolder: string) {
         this.axiosInstance = axios.create({
@@ -46,9 +48,13 @@ export class Executor {
     }
 
     initialize() {
+        this.spinner.color = 'yellow';
+	    this.spinner.text = 'Initializing';
+        this.spinner.start()
         let config = this.env.apis[this.moduleName]
         if (!config) {
-            throw new Error("ERROR: Could not get module configuration from environment")
+            this.spinner.stop()
+            throw new Error(chalk.bgRed("Unable to get module configuration from environment."))
         }
         this.options = {
             url: config.baseUrl+"/api/abp/api-definition?IncludeTypes=true",
@@ -60,31 +66,33 @@ export class Executor {
     }
 
     getApiDefinition() {
-        console.log("INFO: Getting Api definition...")
+	    this.spinner.text = 'Getting Api definition';
         return this.axiosInstance.get(this.options?.url!).then((response) => {
             this.appConfig = response.data
             return this
         }).catch(error => {
-            throw new Error("ERROR: Could not get api definition")
+            this.spinner.stop()
+            throw new Error(chalk.bgRed("Unable to get api definition"))
         })
+        
     }
 
     configureServicesAndDtos() {
-        console.log("INFO: Configure services and dtos...")
+	    this.spinner.text = 'Configuring services and dtos';
         this.factory = new Factory(this.options!, this.appConfig.modules, this.appConfig.types)
         this.factory.resolveServices()
-        this.factory.groupDtosByNamespace()
+        this.factory.groupDtosByNamespace() 
         return this
     }
 
     renderFiles() {
-        console.log("INFO: Rendering files...")
+	    this.spinner.text = 'Rendering files';
         this.renderer = new Renderer(this.factory?.services!, this.factory?.models!)
         return this
     }
 
     saveFiles() {
-        console.log("INFO: Saving into directory...")
+	    this.spinner.text = 'Saving into directory';
         this.renderer?.services.forEach(service => {
             var dir = './src/' + this.options?.targetFolder + '/proxy/services/' + service.directory;
 
@@ -100,7 +108,8 @@ export class Executor {
                 fs.mkdirSync(dir, { recursive: true });
             }
             fs.writeFileSync(dir + "/" + model.fileName, model.content)
-        })
+        }) 
+	    this.spinner.succeed("Proxy files saved successfully.")
         return this
     }
 

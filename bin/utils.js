@@ -1,6 +1,7 @@
 
 const fs = require("fs")
 const babel = require("@babel/core")
+const chalk = require("chalk")
 
 function showHelp() {                                                             
     
@@ -34,7 +35,7 @@ function getEnvironment() {
         fs.unlinkSync(pathToTemp)
         return enVars
     } catch (e) {
-        throw new Error("ERROR: Could read environment file")
+        throw new Error(chalk.bgRed("Unable to read environment file."))
     }
     
 }

@@ -19,7 +19,7 @@ function generateProxy(args) {
     if (!validateArgs(args)) {
         return
     }
-    let env = getEnvironment() 
+    let env = getEnvironment()
     var executor = new Executor(env, yargs.argv.m, yargs.argv.t);
 
     try {
