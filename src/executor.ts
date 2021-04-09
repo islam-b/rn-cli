@@ -51,13 +51,14 @@ export class Executor {
         this.spinner.color = 'yellow';
 	    this.spinner.text = 'Initializing';
         this.spinner.start()
-        let config = this.env.apis[this.moduleName]
+        let config = !!this.env.apis ? this.env.apis[this.moduleName] : null
         if (!config) {
             this.spinner.stop()
             throw new Error(chalk.bgRed("Unable to get module configuration from environment."))
         }
+        let prefix = config.baseUrl.lastIndexOf("/") == config.baseUrl.length-1 ? "" : "/"
         this.options = {
-            url: config.baseUrl+"/api/abp/api-definition?IncludeTypes=true",
+            url: config.baseUrl+prefix+"api/abp/api-definition?IncludeTypes=true",
             module: this.moduleName,
             rootNamespace: config.rootNamespace,
             targetFolder: this.targetFolder
