@@ -20,6 +20,10 @@
   "bin": {
     "abp-generate-proxy-rn": "./bin/index.js"
   },
+  "repository": {
+  "type": "git",
+  "url": "https://github.com/islam2018/rn-cli.git"
+},
   "author": "Islam Bouayache",
   "license": "ISC",
   "dependencies": {

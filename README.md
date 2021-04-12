@@ -60,7 +60,3 @@ npx abp-generate-proxy-rn -m <module-name> -t <target-folder>
 - **-m,  --module** : The name of the module.
 - **-t, --target** : The target folder to save files, starting from ``` PROJECT_FOLDER/src/```. 
 
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
